@@ -16,8 +16,15 @@ DROP TYPE IF EXISTS resource_type CASCADE;
 -- ============================================================
 -- ENUM TYPES
 -- ============================================================
-CREATE TYPE booking_status AS ENUM ('pending', 'confirmed', 'cancelled');
-CREATE TYPE resource_type  AS ENUM ('room', 'equipment', 'service');
+DO $$ BEGIN
+  CREATE TYPE booking_status AS ENUM ('pending', 'confirmed', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE resource_type AS ENUM ('room', 'equipment', 'service');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ============================================================
 -- BUSINESSES
