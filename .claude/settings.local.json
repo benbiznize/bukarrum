@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "WebFetch(domain:docs.fintoc.com)",
+      "WebSearch"
+    ]
+  }
+}
