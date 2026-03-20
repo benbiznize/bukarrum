@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DoorOpen, CalendarCheck, Clock, ArrowRight, Plus } from "lucide-react";
+import { DoorOpen, CalendarCheck, Clock, ArrowRight, Plus, TrendingUp } from "lucide-react";
 import OnboardingForm from "@/components/dashboard/OnboardingForm";
 
 export default async function DashboardPage({
@@ -70,7 +70,7 @@ export default async function DashboardPage({
   }
 
   // Stats for selected location
-  const [{ count: resourceCount }, { data: recentBookings }, { count: confirmedCount }] =
+  const [{ count: resourceCount }, { data: recentBookings }, { data: confirmedBookings }] =
     await Promise.all([
       supabase.from("resources").select("*", { count: "exact", head: true }).eq("location_id", location.id),
       supabase
@@ -81,10 +81,13 @@ export default async function DashboardPage({
         .limit(5),
       supabase
         .from("bookings")
-        .select("*", { count: "exact", head: true })
+        .select("total_price")
         .eq("location_id", location.id)
         .eq("status", "confirmed"),
     ]);
+
+  const confirmedCount = confirmedBookings?.length ?? 0;
+  const totalRevenue = confirmedBookings?.reduce((sum, b) => sum + Number(b.total_price), 0) ?? 0;
 
   return (
     <div className="space-y-6">
@@ -101,7 +104,7 @@ export default async function DashboardPage({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Resources</CardTitle>
@@ -128,6 +131,17 @@ export default async function DashboardPage({
           <CardContent>
             <div className="text-2xl font-bold">
               {recentBookings?.filter((b) => b.status === "pending").length ?? 0}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(totalRevenue)}
             </div>
           </CardContent>
         </Card>
