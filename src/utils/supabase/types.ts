@@ -341,6 +341,55 @@ export type Database = {
           },
         ]
       }
+      upgrade_requests: {
+        Row: {
+          business_id: string
+          created_at: string
+          current_plan: string
+          id: string
+          status: string
+          target_plan: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          current_plan: string
+          id?: string
+          status?: string
+          target_plan: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          current_plan?: string
+          id?: string
+          status?: string
+          target_plan?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upgrade_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "upgrade_requests_current_plan_fkey"
+            columns: ["current_plan"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "upgrade_requests_target_plan_fkey"
+            columns: ["target_plan"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -487,9 +536,3 @@ export const Constants = {
   },
 } as const
 
-export type Availability = Database["public"]["Tables"]["availability"]["Row"]
-export type Booking = Database["public"]["Tables"]["bookings"]["Row"]
-export type Business = Database["public"]["Tables"]["businesses"]["Row"]
-export type Location = Database["public"]["Tables"]["locations"]["Row"]
-export type Resource = Database["public"]["Tables"]["resources"]["Row"]
-export type ResourceType = Database["public"]["Enums"]["resource_type"]
