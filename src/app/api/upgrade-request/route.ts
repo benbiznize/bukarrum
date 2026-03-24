@@ -36,6 +36,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    await supabase.from("upgrade_requests").insert({
+      business_id: businessId,
+      current_plan: business.plan_id,
+      target_plan: targetPlan,
+      status: "pending",
+    });
+
     const { data: ownerData } = await supabase.auth.admin.getUserById(
       business.owner_id,
     );
