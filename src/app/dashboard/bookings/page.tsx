@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import BookingsManager from "@/components/dashboard/BookingsManager";
-import type { Booking } from "@/lib/supabase/types";
+import type { Booking } from "@/utils/supabase/types";
 
 type BookingWithResource = Booking & { resources: { name: string } | null };
 

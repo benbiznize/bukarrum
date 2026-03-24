@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { format } from "date-fns";
-import { createServiceClient } from "./supabase/service";
+import { createServiceClient } from "@/utils/supabase/service";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? "placeholder");

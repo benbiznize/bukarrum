@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import type { Resource, ResourceType } from "@/lib/supabase/types";
+import type { Resource, ResourceType } from "@/utils/supabase/types";
 import { Plus, Pencil, Trash2, DoorOpen } from "lucide-react";
 
 interface Props {
