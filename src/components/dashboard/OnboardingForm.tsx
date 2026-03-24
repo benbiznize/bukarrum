@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { isAtLimit, type PlanLimits } from "@/utils/plans";
+import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
 
 function slugify(text: string) {
   return text
@@ -21,11 +23,19 @@ function slugify(text: string) {
 
 interface Props {
   userId: string;
-  businessId?: string;        // provided when adding a location to an existing business
-  mode?: "business" | "location"; // "business" = full onboarding; "location" = add location only
+  businessId?: string;
+  mode?: "business" | "location";
+  planLimits?: PlanLimits;
+  locationCount?: number;
 }
 
-export default function OnboardingForm({ userId, businessId, mode = "business" }: Props) {
+export default function OnboardingForm({
+  userId,
+  businessId,
+  mode = "business",
+  planLimits,
+  locationCount = 0,
+}: Props) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -55,14 +65,25 @@ export default function OnboardingForm({ userId, businessId, mode = "business" }
       // Adding a new location to existing business
       const { data: newLocation, error } = await supabase
         .from("locations")
-        .insert({ business_id: businessId, name: locationName, address: address || null })
+        .insert({
+          business_id: businessId,
+          name: locationName,
+          address: address || null,
+        })
         .select("id")
         .single();
 
       if (error) {
-        toast({ title: "Error creating location", description: error.message, variant: "destructive" });
+        toast({
+          title: "Error creating location",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        toast({ title: "Location added!", description: "Now add resources to this location." });
+        toast({
+          title: "Location added!",
+          description: "Now add resources to this location.",
+        });
         router.push(`/dashboard?location=${newLocation.id}`);
         router.refresh();
       }
@@ -79,39 +100,77 @@ export default function OnboardingForm({ userId, businessId, mode = "business" }
         .from("studio-assets")
         .upload(path, logoFile);
       if (!uploadError) {
-        const { data } = supabase.storage.from("studio-assets").getPublicUrl(path);
+        const { data } = supabase.storage
+          .from("studio-assets")
+          .getPublicUrl(path);
         logo_url = data.publicUrl;
       }
     }
 
     const { data: newBusiness, error: bizError } = await supabase
       .from("businesses")
-      .insert({ owner_id: userId, name: businessName, slug, description: description || null, logo_url })
+      .insert({
+        owner_id: userId,
+        name: businessName,
+        slug,
+        description: description || null,
+        logo_url,
+      })
       .select("id")
       .single();
 
     if (bizError) {
-      toast({ title: "Error creating business", description: bizError.message, variant: "destructive" });
+      toast({
+        title: "Error creating business",
+        description: bizError.message,
+        variant: "destructive",
+      });
       setLoading(false);
       return;
     }
 
     const { data: newLocation, error: locError } = await supabase
       .from("locations")
-      .insert({ business_id: newBusiness.id, name: locationName || businessName, address: address || null })
+      .insert({
+        business_id: newBusiness.id,
+        name: locationName || businessName,
+        address: address || null,
+      })
       .select("id")
       .single();
 
     if (locError) {
-      toast({ title: "Error creating location", description: locError.message, variant: "destructive" });
+      toast({
+        title: "Error creating location",
+        description: locError.message,
+        variant: "destructive",
+      });
       setLoading(false);
       return;
     }
 
-    toast({ title: "Business created!", description: "Your business is ready. Now add some resources." });
+    toast({
+      title: "Business created!",
+      description: "Your business is ready. Now add some resources.",
+    });
     router.push(`/dashboard?location=${newLocation.id}`);
     router.refresh();
     setLoading(false);
+  }
+
+  const atLocationLimit =
+    mode === "location" && planLimits
+      ? isAtLimit(locationCount, planLimits.max_locations)
+      : false;
+
+  if (atLocationLimit && planLimits) {
+    return (
+      <UpgradePrompt
+        currentPlan={planLimits.id}
+        limitType="locations"
+        limitValue={planLimits.max_locations}
+      />
+    );
   }
 
   return (
@@ -136,7 +195,9 @@ export default function OnboardingForm({ userId, businessId, mode = "business" }
               <div className="space-y-2">
                 <Label htmlFor="slug">Public URL slug *</Label>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">bukarrum.com/book/</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    bukarrum.com/book/
+                  </span>
                   <Input
                     id="slug"
                     value={slug}
@@ -177,7 +238,11 @@ export default function OnboardingForm({ userId, businessId, mode = "business" }
               id="lname"
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
-              placeholder={mode === "business" ? "e.g. Main Studio, Branch A…" : "e.g. Branch B"}
+              placeholder={
+                mode === "business"
+                  ? "e.g. Main Studio, Branch A…"
+                  : "e.g. Branch B"
+              }
               required={mode === "location"}
             />
           </div>
@@ -193,8 +258,12 @@ export default function OnboardingForm({ userId, businessId, mode = "business" }
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading
-              ? mode === "location" ? "Adding location…" : "Creating business…"
-              : mode === "location" ? "Add location" : "Create business"}
+              ? mode === "location"
+                ? "Adding location…"
+                : "Creating business…"
+              : mode === "location"
+                ? "Add location"
+                : "Create business"}
           </Button>
         </CardContent>
       </form>

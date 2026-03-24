@@ -2,9 +2,21 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
 export function createServiceClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const legacySecretKey = process.env.SUPABASE_SECRET_KEY;
+  const key = serviceRoleKey ?? legacySecretKey;
+
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is required");
+  }
+  if (!key) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for server-side Supabase operations");
+  }
+
   return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
+    supabaseUrl,
+    key,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
