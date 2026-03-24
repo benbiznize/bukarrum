@@ -1,6 +1,6 @@
 name: "generate-types"
 on:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
