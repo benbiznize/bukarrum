@@ -23,6 +23,15 @@ export default async function UpgradePage() {
 
   if (!business) redirect("/dashboard");
 
+  const { data: pendingRequest } = await supabase
+    .from("upgrade_requests")
+    .select("target_plan, created_at")
+    .eq("business_id", business.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const currentPlanId = (business.plan_id as string) ?? "free";
   const currentPlanIndex = PLAN_ORDER.indexOf(currentPlanId as typeof PLAN_ORDER[number]);
 
@@ -36,6 +45,18 @@ export default async function UpgradePage() {
           </span>
         </p>
       </div>
+
+      {pendingRequest && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 flex items-start gap-3">
+          <span className="text-amber-500 text-lg leading-none">⏳</span>
+          <div>
+            <p className="font-medium text-amber-800 text-sm">Solicitud de upgrade pendiente</p>
+            <p className="text-amber-700 text-sm mt-0.5">
+              Tu solicitud para cambiar al plan <strong>{PLAN_DISPLAY[pendingRequest.target_plan]?.label}</strong> está siendo procesada. Te notificaremos cuando esté activo.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {PLAN_ORDER.map((planId) => {
@@ -106,6 +127,7 @@ export default async function UpgradePage() {
                     businessId={business.id}
                     currentPlan={currentPlanId}
                     targetPlan={planId}
+                    isPending={pendingRequest?.target_plan === planId}
                   />
                 ) : (
                   <button
