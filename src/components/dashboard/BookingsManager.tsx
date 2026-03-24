@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import type { Booking } from "@/lib/supabase/types";
+import type { Booking } from "@/utils/supabase/types";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, CalendarX } from "lucide-react";
 

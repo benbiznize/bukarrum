@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { format } from "date-fns";
-import { createServiceClient } from "./supabase/service";
+import { createServiceClient } from "@/utils/supabase/service";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? "placeholder");
@@ -309,4 +309,66 @@ export async function sendCancellationEmail(params: {
   }
 
   await Promise.all(sends);
+}
+
+export async function sendUpgradeRequestToAdmin(params: {
+  businessName: string;
+  ownerEmail: string;
+  currentPlan: string;
+  targetPlan: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const adminEmail = process.env.RESEND_FROM_EMAIL ?? "contacto@bukarrum.com";
+  const now = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
+
+  await getResend().emails.send({
+    from: getFrom(),
+    to: adminEmail,
+    subject: `[Bukarrum] Solicitud de upgrade — ${params.businessName} → ${params.targetPlan}`,
+    html: `
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+  body{font-family:Arial,sans-serif;background:#f9f9f9;margin:0;padding:20px}
+  .card{background:white;border-radius:8px;max-width:480px;margin:0 auto;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+  h1{color:#6d28d9;margin-top:0}.detail{margin:8px 0;font-size:15px;color:#333}
+  .label{color:#888;font-size:13px}.highlight{font-weight:bold;color:#6d28d9}
+</style></head><body>
+<div class="card">
+  <h1>Solicitud de upgrade</h1>
+  <div class="detail"><span class="label">Negocio</span><br/>${params.businessName}</div>
+  <div class="detail"><span class="label">Email del dueño</span><br/>${params.ownerEmail}</div>
+  <div class="detail"><span class="label">Plan actual</span><br/>${params.currentPlan}</div>
+  <div class="detail"><span class="label">Plan solicitado</span><br/><span class="highlight">${params.targetPlan}</span></div>
+  <div class="detail"><span class="label">Fecha</span><br/>${now}</div>
+  <p style="margin-top:20px;font-size:14px;color:#555;">Actualiza el <code>plan_id</code> en Supabase Studio para activar el plan.</p>
+</div></body></html>`,
+  });
+}
+
+export async function sendUpgradeConfirmationToOwner(params: {
+  ownerEmail: string;
+  businessName: string;
+  targetPlan: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  await getResend().emails.send({
+    from: getFrom(),
+    to: params.ownerEmail,
+    subject: `Recibimos tu solicitud de upgrade — ${params.businessName}`,
+    html: `
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+  body{font-family:Arial,sans-serif;background:#f9f9f9;margin:0;padding:20px}
+  .card{background:white;border-radius:8px;max-width:480px;margin:0 auto;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+  h1{color:#6d28d9;margin-top:0}.notice{background:#f3f0ff;border-radius:6px;padding:12px 16px;margin-top:16px;font-size:13px;color:#5b21b6}
+  .footer{text-align:center;margin-top:24px;font-size:12px;color:#aaa}
+</style></head><body>
+<div class="card">
+  <h1>¡Solicitud recibida!</h1>
+  <p>Hola, recibimos tu solicitud para actualizar <strong>${params.businessName}</strong> al plan <strong>${params.targetPlan}</strong>.</p>
+  <div class="notice">⏳ Activaremos tu nuevo plan en menos de 24 horas. Te notificaremos por email cuando esté listo.</div>
+  <p style="margin-top:16px;font-size:14px;color:#555;">Si tienes preguntas, responde a este email y te ayudaremos a la brevedad.</p>
+  <div class="footer">Powered by Bukarrum</div>
+</div></body></html>`,
+  });
 }

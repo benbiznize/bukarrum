@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DoorOpen, CalendarCheck, Clock, ArrowRight, Plus, TrendingUp } from "lucide-react";
 import OnboardingForm from "@/components/dashboard/OnboardingForm";
+import { PLAN_DISPLAY, type PlanLimits } from "@/utils/plans";
 
 export default async function DashboardPage({
   searchParams,
@@ -18,9 +19,19 @@ export default async function DashboardPage({
 
   const { data: business } = await supabase
     .from("businesses")
-    .select("*")
+    .select("*, plans(id, name, max_locations, max_resources_per_location, max_bookings_per_month, features)")
     .eq("owner_id", user.id)
     .single();
+
+  const planLimits: PlanLimits = (business?.plans as PlanLimits | null) ?? {
+    id: "free",
+    name: "Gratuito",
+    max_locations: 1,
+    max_resources_per_location: 3,
+    max_bookings_per_month: 30,
+    features: { analytics: false, addons: false, hide_branding: false },
+  };
+  const planDisplay = PLAN_DISPLAY[planLimits.id] ?? PLAN_DISPLAY.free;
 
   // No business yet → onboarding
   if (!business) {
@@ -35,11 +46,22 @@ export default async function DashboardPage({
 
   // Add new location
   if (searchParams.new === "1") {
+    const { data: existingLocations } = await supabase
+      .from("locations")
+      .select("id", { count: "exact" })
+      .eq("business_id", business.id);
+
     return (
       <div className="max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-2">Add a new location</h1>
         <p className="text-muted-foreground mb-6">Each location gets its own rooms and availability under <strong>{business.name}</strong>.</p>
-        <OnboardingForm userId={user.id} businessId={business.id} mode="location" />
+        <OnboardingForm
+          userId={user.id}
+          businessId={business.id}
+          mode="location"
+          planLimits={planLimits}
+          locationCount={existingLocations?.length ?? 0}
+        />
       </div>
     );
   }
@@ -93,7 +115,12 @@ export default async function DashboardPage({
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{business.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{business.name}</h1>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${planDisplay.color}`}>
+              {planDisplay.label}
+            </span>
+          </div>
           <p className="text-muted-foreground">bukarrum.com/book/{business.slug} · {location.name}</p>
         </div>
         <Button variant="outline" size="sm" asChild>
@@ -111,7 +138,12 @@ export default async function DashboardPage({
             <DoorOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{resourceCount ?? 0}</div>
+            <div className="text-2xl font-bold">
+              {resourceCount ?? 0}
+              {planLimits.max_resources_per_location !== null && (
+                <span className="text-sm font-normal text-muted-foreground"> / {planLimits.max_resources_per_location}</span>
+              )}
+            </div>
           </CardContent>
         </Card>
         <Card>

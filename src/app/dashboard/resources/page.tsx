@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import ResourcesManager from "@/components/dashboard/ResourcesManager";
+import type { PlanLimits } from "@/utils/plans";
 
 export default async function ResourcesPage({
   searchParams,
@@ -13,9 +14,18 @@ export default async function ResourcesPage({
 
   const { data: business } = await supabase
     .from("businesses")
-    .select("id")
+    .select("id, plan_id, plans(id, name, max_locations, max_resources_per_location, max_bookings_per_month, features)")
     .eq("owner_id", user.id)
     .single();
+
+  const planLimits: PlanLimits = (business?.plans as PlanLimits | null) ?? {
+    id: "free",
+    name: "Gratuito",
+    max_locations: 1,
+    max_resources_per_location: 3,
+    max_bookings_per_month: 30,
+    features: { analytics: false, addons: false, hide_branding: false },
+  };
 
   if (!business) redirect("/dashboard");
 
@@ -54,7 +64,7 @@ export default async function ResourcesPage({
         <h1 className="text-2xl font-bold">Resources — {location.name}</h1>
         <p className="text-muted-foreground">Manage the bookable resources at this location.</p>
       </div>
-      <ResourcesManager locationId={location.id} initialResources={resources ?? []} />
+      <ResourcesManager locationId={location.id} initialResources={resources ?? []} planLimits={planLimits} />
     </div>
   );
 }

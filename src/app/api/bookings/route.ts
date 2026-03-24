@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient } from "@/utils/supabase/service";
 import { sendBookingNotificationToBusiness, sendBookingPendingToClient } from "@/lib/email";
+import { isAtLimit } from "@/utils/plans";
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +36,36 @@ export async function POST(req: NextRequest) {
         { error: "This time slot is no longer available. Please select another." },
         { status: 409 }
       );
+    }
+
+    // Check monthly booking limit for this business's plan
+    const { data: bizPlan } = await supabase
+      .from("businesses")
+      .select("plan_id, plans(max_bookings_per_month)")
+      .eq("id", businessId)
+      .single();
+
+    const maxPerMonth: number | null = (bizPlan?.plans as { max_bookings_per_month: number | null } | null)?.max_bookings_per_month ?? null;
+
+    if (maxPerMonth !== null) {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+
+      const { count } = await supabase
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("business_id", businessId)
+        .in("status", ["pending", "confirmed"])
+        .gte("created_at", monthStart)
+        .lt("created_at", monthEnd);
+
+      if (isAtLimit(count ?? 0, maxPerMonth)) {
+        return NextResponse.json(
+          { error: "booking_limit_reached", plan: bizPlan?.plan_id ?? "free" },
+          { status: 403 }
+        );
+      }
     }
 
     // Create booking as "pending"

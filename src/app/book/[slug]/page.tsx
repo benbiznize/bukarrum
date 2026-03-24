@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import BookingPageClient from "@/components/booking/BookingPageClient";
-import type { Business, Location, Resource, Availability } from "@/lib/supabase/types";
+import type { Business, Location, Resource, Availability } from "@/utils/supabase/types";
 
 type ResourceWithAvailability = Resource & { availability: Availability[] };
 type LocationWithResources = {

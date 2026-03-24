@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,12 +12,15 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import type { Resource, ResourceType } from "@/lib/supabase/types";
+import type { Resource, ResourceType } from "@/utils/supabase/types";
 import { Plus, Pencil, Trash2, DoorOpen } from "lucide-react";
+import { isAtLimit, type PlanLimits } from "@/utils/plans";
+import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
 
 interface Props {
   locationId: string;
   initialResources: Resource[];
+  planLimits: PlanLimits;
 }
 
 const emptyForm = {
@@ -35,7 +38,7 @@ const TYPE_LABELS: Record<ResourceType, string> = {
   service: "Service",
 };
 
-export default function ResourcesManager({ locationId, initialResources }: Props) {
+export default function ResourcesManager({ locationId, initialResources, planLimits }: Props) {
   const { toast } = useToast();
   const [resources, setResources] = useState<Resource[]>(initialResources);
   const [open, setOpen] = useState(false);
@@ -138,13 +141,22 @@ export default function ResourcesManager({ locationId, initialResources }: Props
     }
   }
 
+  const atResourceLimit = isAtLimit(resources.length, planLimits.max_resources_per_location);
+
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={openCreate}>
+        <Button onClick={openCreate} disabled={atResourceLimit}>
           <Plus className="h-4 w-4 mr-2" /> Add resource
         </Button>
       </div>
+      {atResourceLimit && (
+        <UpgradePrompt
+          currentPlan={planLimits.id}
+          limitType="resources"
+          limitValue={planLimits.max_resources_per_location}
+        />
+      )}
 
       {resources.length === 0 ? (
         <Card>

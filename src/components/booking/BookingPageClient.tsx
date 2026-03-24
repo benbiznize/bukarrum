@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Business, Resource, Availability } from "@/lib/supabase/types";
+import type { Business, Resource, Availability } from "@/utils/supabase/types";
 import { Users, Clock, ChevronRight, MapPin } from "lucide-react";
 import BookingForm from "./BookingForm";
 

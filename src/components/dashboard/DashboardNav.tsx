@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, DoorOpen, CalendarDays, BookOpen, LogOut, ExternalLink, ChevronDown, Plus, MapPin } from "lucide-react";
+import { LayoutDashboard, DoorOpen, CalendarDays, BookOpen, LogOut, ExternalLink, ChevronDown, Plus, MapPin, Zap } from "lucide-react";
 
 interface Location {
   id: string;
@@ -22,9 +22,10 @@ interface Props {
   user: { email?: string } | null;
   business: Business | null;
   locations: Location[];
+  planId?: string;
 }
 
-export default function DashboardNav({ user, business, locations }: Props) {
+export default function DashboardNav({ user, business, locations, planId = "free" }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -116,6 +117,14 @@ export default function DashboardNav({ user, business, locations }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
+          {planId === "free" && (
+            <Button size="sm" asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Link href="/dashboard/upgrade">
+                <Zap className="h-3.5 w-3.5 mr-1.5" />
+                Upgrade
+              </Link>
+            </Button>
+          )}
           {business && (
             <Button variant="outline" size="sm" asChild>
               <Link href={`/book/${business.slug}`} target="_blank">

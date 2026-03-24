@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { data: business } = await supabase
     .from("businesses")
-    .select("id, name, slug")
+    .select("id, name, slug, plan_id")
     .eq("owner_id", user.id)
     .single();
 
@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardNav user={user} business={business} locations={locations ?? []} />
+      <DashboardNav user={user} business={business} locations={locations ?? []} planId={(business?.plan_id as string) ?? "free"} />
       <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
     </div>
   );

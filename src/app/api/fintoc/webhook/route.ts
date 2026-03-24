@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient } from "@/utils/supabase/service";
 import { sendBookingConfirmationToClient } from "@/lib/email";
 import { createHmac, timingSafeEqual } from "crypto";
 

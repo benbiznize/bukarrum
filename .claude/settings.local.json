@@ -5,5 +5,9 @@
       "WebFetch(domain:docs.fintoc.com)",
       "WebSearch"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "supabase"
+  ],
+  "enableAllProjectMcpServers": true
 }
