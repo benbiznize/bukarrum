@@ -524,6 +524,15 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+// ─── Convenience row types ────────────────────────────────────────────────────
+export type Business      = Tables<"businesses">
+export type Location      = Tables<"locations">
+export type Resource      = Tables<"resources">
+export type Availability  = Tables<"availability">
+export type Booking       = Tables<"bookings">
+export type UpgradeRequest = Tables<"upgrade_requests">
+export type ResourceType  = Database["public"]["Enums"]["resource_type"]
+
 export const Constants = {
   graphql_public: {
     Enums: {},
