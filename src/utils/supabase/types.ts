@@ -1,4 +1,3 @@
-Connecting to db 5432
 export type Json =
   | string
   | number
@@ -488,5 +487,9 @@ export const Constants = {
   },
 } as const
 
-A new version of Supabase CLI is available: v2.78.1 (currently installed v2.75.0)
-We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+export type Availability = Database["public"]["Tables"]["availability"]["Row"]
+export type Booking = Database["public"]["Tables"]["bookings"]["Row"]
+export type Business = Database["public"]["Tables"]["businesses"]["Row"]
+export type Location = Database["public"]["Tables"]["locations"]["Row"]
+export type Resource = Database["public"]["Tables"]["resources"]["Row"]
+export type ResourceType = Database["public"]["Enums"]["resource_type"]

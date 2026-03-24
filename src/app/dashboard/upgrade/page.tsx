@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Check } from "lucide-react";
-import { PLAN_DISPLAY, PLAN_FEATURES, PLAN_ORDER, PLAN_PRICING, type PlanLimits } from "@/utils/plans";
+import { PLAN_DISPLAY, PLAN_FEATURES, PLAN_ORDER, PLAN_PRICING } from "@/utils/plans";
 import { UpgradeRequestForm } from "@/components/dashboard/UpgradeRequestForm";
 
 const PLAN_LIMITS_DISPLAY: Record<string, { locations: string; resources: string; bookings: string }> = {

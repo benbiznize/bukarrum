@@ -36,8 +36,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: ownerData, error: ownerError } =
-      await supabase.auth.admin.getUserById(business.owner_id);
+    const { data: ownerData } = await supabase.auth.admin.getUserById(
+      business.owner_id,
+    );
     const ownerEmail = ownerData.user?.email;
 
     if (!ownerEmail) {
