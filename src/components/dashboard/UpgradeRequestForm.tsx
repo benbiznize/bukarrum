@@ -9,9 +9,10 @@ interface Props {
   businessId: string;
   currentPlan: string;
   targetPlan: string;
+  isPending?: boolean;
 }
 
-export function UpgradeRequestForm({ businessId, currentPlan, targetPlan }: Props) {
+export function UpgradeRequestForm({ businessId, currentPlan, targetPlan, isPending = false }: Props) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -41,12 +42,12 @@ export function UpgradeRequestForm({ businessId, currentPlan, targetPlan }: Prop
     }
   }
 
-  if (done) {
+  if (done || isPending) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-5 text-center">
-        <p className="font-medium text-green-800">¡Solicitud enviada!</p>
-        <p className="mt-1 text-sm text-green-700">
-          Activaremos tu plan {targetLabel} en menos de 24 horas. Te avisaremos por email.
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-center">
+        <p className="font-medium text-amber-800">Solicitud pendiente</p>
+        <p className="mt-1 text-sm text-amber-700">
+          Tu solicitud para el plan {targetLabel} está siendo procesada. Te avisaremos por email.
         </p>
       </div>
     );
