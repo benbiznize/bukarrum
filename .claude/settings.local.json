@@ -3,11 +3,23 @@
     "allow": [
       "Bash(npm run:*)",
       "WebFetch(domain:docs.fintoc.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); [''next'',''react'',''react-dom'',''eslint'',''eslint-config-next'',''@types/react''].forEach\\(k => console.log\\(k, p.dependencies?.[k] || p.devDependencies?.[k]\\)\\)\")",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(JSON.stringify\\(p.scripts, null, 2\\)\\)\")",
+      "Bash(node -e \"const c = require\\(''''eslint-config-next''''\\); console.log\\(Object.keys\\(c\\)\\)\")",
+      "Bash(node -e \"const c = require\\(''eslint-config-next''\\); c.forEach\\(\\(item, i\\) => console.log\\(i, Object.keys\\(item\\)\\)\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
