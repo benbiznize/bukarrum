@@ -13,16 +13,17 @@ type LocationWithResources = {
 };
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export default async function PublicBookingPage({ params }: Props) {
+export default async function PublicBookingPage(props: Props) {
+  const { slug } = await props.params;
   const supabase = await createClient();
 
   const { data: businessRow } = await supabase
     .from("businesses")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
   const business = businessRow as Business | null;
 
@@ -61,12 +62,13 @@ export default async function PublicBookingPage({ params }: Props) {
   return <BookingPageClient business={business} locations={locations} />;
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata(props: Props) {
+  const { slug } = await props.params;
   const supabase = await createClient();
   const { data: business } = await supabase
     .from("businesses")
     .select("name, description")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
   return {
