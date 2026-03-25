@@ -78,6 +78,7 @@ export default function BookingForm({ business, location, resource }: Props) {
     if (!selectedDate) return;
     const dow = new Date(selectedDate + "T00:00:00").getDay();
     const avail = resource.availability.find((a) => a.day_of_week === dow);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!avail) { setAvailableSlots([]); return; }
     setAvailableSlots(generateTimeSlots(avail.open_time, avail.close_time));
 
