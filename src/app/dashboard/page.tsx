@@ -8,11 +8,10 @@ import { DoorOpen, CalendarCheck, Clock, ArrowRight, Plus, TrendingUp } from "lu
 import OnboardingForm from "@/components/dashboard/OnboardingForm";
 import { PLAN_DISPLAY, type PlanLimits } from "@/utils/plans";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { location?: string; new?: string };
+export default async function DashboardPage(props: {
+  searchParams: Promise<{ location?: string; new?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

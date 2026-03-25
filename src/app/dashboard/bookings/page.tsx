@@ -5,11 +5,10 @@ import type { Booking } from "@/utils/supabase/types";
 
 type BookingWithResource = Booking & { resources: { name: string } | null };
 
-export default async function BookingsPage({
-  searchParams,
-}: {
-  searchParams: { location?: string };
+export default async function BookingsPage(props: {
+  searchParams: Promise<{ location?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

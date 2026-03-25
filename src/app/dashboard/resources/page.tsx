@@ -3,11 +3,10 @@ import { createClient } from "@/utils/supabase/server";
 import ResourcesManager from "@/components/dashboard/ResourcesManager";
 import type { PlanLimits } from "@/utils/plans";
 
-export default async function ResourcesPage({
-  searchParams,
-}: {
-  searchParams: { location?: string };
+export default async function ResourcesPage(props: {
+  searchParams: Promise<{ location?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

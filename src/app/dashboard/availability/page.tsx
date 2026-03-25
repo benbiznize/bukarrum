@@ -2,11 +2,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import AvailabilityManager from "@/components/dashboard/AvailabilityManager";
 
-export default async function AvailabilityPage({
-  searchParams,
-}: {
-  searchParams: { location?: string };
+export default async function AvailabilityPage(props: {
+  searchParams: Promise<{ location?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
